@@ -244,9 +244,7 @@ app.use(async (ctx, next) => {
     await next();
 
     ctx.body = {
-        status: ctx.body?.status || 555,
-        body: ctx.body?.body || "someting wrong",
-        ...(typeof ctx.body === "object" ? ctx.body : { msg: ctx.body }),
+        ...(typeof ctx.body === "object" ? ctx.body : { body: ctx.body }),
     };
 });
 
