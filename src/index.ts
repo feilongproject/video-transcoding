@@ -132,16 +132,14 @@ router.post('/upload', async (ctx, next) => {
 
     // 实时输出 stdout
     runningJob.job!.stdout.on('data', (data) => {
-        process.stdout.write(data);
-        runningJob.process = data.toString();
-        // ctx.body += `stdout: ${data}\n`; // 将输出附加到响应中
+        // process.stdout.write(data);
+        runningJob.process = (data as Buffer).toString().trim();
     });
 
     // 实时输出 stderr
     runningJob.job!.stderr.on('data', (data) => {
-        process.stdout.write(data);
-        runningJob.process = data.toString();
-        // ctx.body += `stderr: ${data}\n`; // 将输出附加到响应中
+        // process.stdout.write(data);
+        runningJob.process = (data as Buffer).toString().trim();
     });
 
     const reload = async () => {
