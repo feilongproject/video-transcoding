@@ -86,7 +86,7 @@ router.post('/upload', async (ctx, next) => {
         $code = @"
         LWLibavVideoSource("%source_file%", cachefile="%source_temp_file%.lwi")
 
-        LoadPlugin("D:\\workspace\\video-transcoding\\VSFilterMod.dll")
+        LoadPlugin("${config.VSFilterMod_DLL_PATH}")
         TextSubMod("${subPath}")
         "@
 
@@ -240,6 +240,14 @@ router.post('/upload', async (ctx, next) => {
     };
 });
 
+app.use(async (ctx, next) => {
+    await next();
+
+    ctx.body = {
+        status: ctx.body?.status || 555,
+        msg: ctx.body?.body || "someting wrong",
+    };
+});
 
 
 app.use(koaBody({
