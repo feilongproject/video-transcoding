@@ -23,6 +23,7 @@ let runningJob = {
     body: "不存在任务",
     filename: undefined as undefined | string,
     log: undefined as undefined | string,
+    process: "",
 };
 
 // 处理文件上传请求
@@ -57,7 +58,7 @@ router.post('/upload', async (ctx, next) => {
 
     console.log("\n");
     console.log("====================");
-    console.log(`date: ${moment().format('YYYY/MM/DD HH-mm-ss')}`);
+    console.log(`date: ${moment().format('YYYY/MM/DD HH:mm:ss')}`);
 
     console.log(`video: ${videoFile.originalFilename || videoFile.newFilename}`);
     console.log(`sub: ${subFile.originalFilename || subFile.newFilename}`);
@@ -97,11 +98,6 @@ router.post('/upload', async (ctx, next) => {
             exit
         }
 
-        #if ($activeProject.VideoEncoder.GetType().Name -ne "x265Enc") {
-        #    [MainModule]::MsgError("Load x265 first")
-        #    exit
-        #}
-
         $commands = [ShortcutModule]::g.DefaultCommands
         $commands.SetFilter("LWLibavVideoSource", "Source", $code)
         `);
@@ -131,17 +127,20 @@ router.post('/upload', async (ctx, next) => {
         body: "任务执行中",
         filename: videoOutPath,
         log: await getLog(),
+        process: "",
     };
 
     // 实时输出 stdout
     runningJob.job!.stdout.on('data', (data) => {
         process.stdout.write(data);
+        runningJob.process = data.toString();
         // ctx.body += `stdout: ${data}\n`; // 将输出附加到响应中
     });
 
     // 实时输出 stderr
     runningJob.job!.stderr.on('data', (data) => {
         process.stdout.write(data);
+        runningJob.process = data.toString();
         // ctx.body += `stderr: ${data}\n`; // 将输出附加到响应中
     });
 
@@ -165,6 +164,7 @@ router.post('/upload', async (ctx, next) => {
                 body: `生成错误, 文件不存在 ${code}`,
                 filename: undefined,
                 log: await getLog(),
+                process: runningJob.process,
             }
         } else {
             runningJob = {
@@ -174,6 +174,7 @@ router.post('/upload', async (ctx, next) => {
                 body: "已成功生成",
                 filename: path.relative(process.cwd(), runningJob.filename!),
                 log: await getLog(),
+                process: runningJob.process,
             };
         }
         fs.rmSync(FILE_TEMP_PATH, { recursive: true, force: true, });
@@ -207,6 +208,7 @@ router.post('/upload', async (ctx, next) => {
                 status: 100,
                 body: "运行中, 请稍后",
                 log: runningJob.log,
+                process: runningJob.process,
             };
         case 200:
             return ctx.body = {
