@@ -63,7 +63,8 @@ router.post('/upload', async (ctx, next) => {
     console.log(`sub: ${subFile.originalFilename || subFile.newFilename}`);
 
 
-
+    fs.mkdirSync(config.FILE_FINAL_PATH, { recursive: true });
+    fs.mkdirSync(config.FILE_STORAGE_PATH, { recursive: true });
     const FILE_TEMP_PATH = fs.mkdtempSync(path.join(config.FILE_STORAGE_PATH, moment().format('YYYYMMDD-HHmmss-')));
     const uuid = crypto.randomUUID();
 
