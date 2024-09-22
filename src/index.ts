@@ -240,13 +240,12 @@ router.post('/upload', async (ctx, next) => {
     };
 });
 
-app.use(async (ctx, next) => {
-    await next();
-
-    ctx.body = {
-        ...(typeof ctx.body === "object" ? ctx.body : { body: ctx.body }),
-    };
-});
+// app.use(async (ctx, next) => {
+//     await next();
+//     ctx.body = {
+//         ...(typeof ctx.body === "object" ? ctx.body : { body: ctx.body }),
+//     };
+// });
 
 
 app.use(koaBody({
