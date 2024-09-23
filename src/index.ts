@@ -133,13 +133,13 @@ router.post('/upload', async (ctx, next) => {
     // 实时输出 stdout
     runningJob.job!.stdout.on('data', (data) => {
         // process.stdout.write(data);
-        runningJob.process = (data as Buffer).toString().trim();
+        runningJob.process = (data as Buffer).toString().trim() || runningJob.process;
     });
 
     // 实时输出 stderr
     runningJob.job!.stderr.on('data', (data) => {
         // process.stdout.write(data);
-        runningJob.process = (data as Buffer).toString().trim();
+        runningJob.process = (data as Buffer).toString().trim() || runningJob.process;
     });
 
     const reload = async () => {
@@ -184,12 +184,35 @@ router.post('/upload', async (ctx, next) => {
         body: "正在运行中",
     };
 
+}).delete("/nowjob", (ctx, next) => {
+    const id = ctx.request.query["id"];
+    if (id !== runningJob.uuid) {
+        ctx.status = 404;
+        return ctx.body = {
+            status: 404,
+            body: `当前id不存在`,
+        };
+    }
+    if (runningJob.status !== 100) {
+        ctx.status = 410;
+        return ctx.body = {
+            status: 410,
+            body: `当前未在运行`,
+        }
+    }
+
+    return ctx.body = {
+        status: 200,
+        body: `已kill进程: ${runningJob.job?.kill()}`,
+    }
+
+
 }).get("/nowjob", (ctx, next) => {
     const id = ctx.request.query["id"];
     if (id !== runningJob.uuid) {
-        ctx.status = 403;
+        ctx.status = 404;
         return ctx.body = {
-            status: 403,
+            status: 404,
             body: `当前id不存在`,
         };
     }
